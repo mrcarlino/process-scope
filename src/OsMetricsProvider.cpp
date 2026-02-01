@@ -1,6 +1,13 @@
 #include "OsMetricsProvider.h"
+#include <iostream>
+#include <fstream>
+#include <filesystem>
 
-OsMetricsProvider::OsMetricsProvider()
+using namespace std::filesystem;
+
+OsMetricsProvider::OsMetricsProvider() :
+    mPrevCpuTotal(0),
+    mPrevCpuIdle(0)
 {
 }
 
@@ -8,17 +15,169 @@ OsMetricsProvider::~OsMetricsProvider()
 {
 }
 
-std::vector<ProcessInfo> OsMetricsProvider::queryProcessTable()
+std::string OsMetricsProvider::getCpuModelName()
 {
-    return std::vector<ProcessInfo>();
+    std::ifstream file("/proc/cpuinfo");
+
+    if (!file.is_open())
+        return "Unknown CPU";
+
+    std::string line;
+
+    while (std::getline(file, line))
+    {
+        if (line.find("model name") != std::string::npos)
+        {
+            size_t colonPos = line.find(":");
+
+            if (colonPos != std::string::npos)
+                return line.substr(colonPos + 1);
+        }
+    }
+
+    return "Unknown CPU";
 }
 
-SystemTotals OsMetricsProvider::querySystemTotals()
+CpuStats OsMetricsProvider::queryCpuStats()
 {
-    return SystemTotals();
+    CpuStats stats;
+
+    std::ifstream file("/proc/stat");
+
+    if (!file.is_open())
+        return CpuStats();
+
+    std::string label;
+    uint64_t user = 0;
+    uint64_t nice = 0;
+    uint64_t system = 0;
+    uint64_t idle = 0;
+    uint64_t iowait = 0;
+    uint64_t irq = 0;
+    uint64_t softirq = 0;
+    uint64_t steal = 0;
+
+    file >> label >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal;    
+
+    // Calculate totals
+    uint64_t currentIdle = idle + iowait;
+    uint64_t currentTotal = user + nice + system + idle + iowait + irq + softirq + steal;
+
+    // Calculate the change since the last check
+    uint64_t totalDiff = currentTotal - mPrevCpuTotal;
+    uint64_t idleDiff = currentIdle - mPrevCpuIdle;
+
+    // Save current values for the next run
+    mPrevCpuTotal = currentTotal;
+    mPrevCpuIdle = currentIdle;
+
+    if (totalDiff > 0)
+        stats.percent = ((double)(totalDiff - idleDiff) / totalDiff) * 100.0;
+
+    return stats;
+}
+
+MemoryStats OsMetricsProvider::queryMemoryStats()
+{
+    MemoryStats stats;
+
+    std::ifstream file("/proc/meminfo");
+
+    if (!file.is_open())
+        return MemoryStats();
+
+    std::string key;
+    std::string unit;
+    uint64_t totalKb = 0;
+    uint64_t availKb = 0;
+    uint64_t value = 0;
+
+    while (file >> key >> value >> unit)
+    {
+        if (key == "MemTotal:")
+            totalKb = value;
+        else if (key == "MemAvailable:")
+            availKb = value;
+    }
+
+    stats.percent = ((double)(totalKb - availKb) / totalKb) * 100.0;
+    stats.usedMb = (totalKb - availKb) / 1024.0;
+    stats.totalMb = totalKb / 1024.0;
+
+    return stats;
+}
+
+std::vector<ProcessInfo> OsMetricsProvider::queryProcessTable()
+{
+    std::vector<ProcessInfo> infoList;
+    infoList.reserve(512);
+    
+    for (const directory_entry& entry : directory_iterator("/proc"))
+    {
+        if (!entry.is_directory())
+            continue;
+
+        const std::string pidStr = entry.path().filename().string();
+
+        // Check for valid entries
+        if (!isAllDigits(pidStr))
+            continue;
+        
+        int pid = -1;
+        try
+        {
+            pid = std::stoi(pidStr);
+        }
+        catch(...)
+        {
+            continue;
+        }
+        
+        std::string name;
+        const std::string commPath = "/proc/" + pidStr + "/comm";
+
+        if (!readFirstLine(commPath, name))
+            continue;
+
+        ProcessInfo info;
+        info.pid = pid;
+        info.name = name;
+
+        //std::cout << "pid: " << info.pid << ", name: " << info.name << std::endl;
+
+        infoList.push_back(std::move(info));
+    }
+
+    return infoList;
 }
 
 ProcessDetails OsMetricsProvider::queryProcessDetails(int pid)
 {
-    return ProcessDetails();
+    ProcessDetails details;
+
+    return details;
+}
+
+bool OsMetricsProvider::isAllDigits(const std::string& str)
+{
+    if (str.empty())
+        return false;
+
+    for (char c : str)
+        if (c < '0' || c > '9')
+            return false;
+
+    return true;
+}
+
+bool OsMetricsProvider::readFirstLine(const std::string &path, std::string &out)
+{
+    std::ifstream file(path);
+    
+    if (!file.is_open())
+        return false;
+    
+    std::getline(file, out);
+    
+    return !out.empty();
 }

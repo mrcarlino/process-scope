@@ -12,7 +12,7 @@
 #include "Viewer.h"
 #include "OsMetricsProvider.h"
 #include "ProcessInfo.h"
-#include "SystemTotals.h"
+#include "MemoryStats.h"
 #include "ProcessDetails.h"
 
 class Controller : public QObject
@@ -26,7 +26,7 @@ public:
 signals:
     // Update the views
     void processTableUpdated(const std::vector<ProcessInfo>& list);
-    void systemTotalsUpdated(const SystemTotals& totals);
+    void systemTotalsUpdated(const MemoryStats& totals);
     void selectedProcessUpdated(const ProcessDetails& details);
     void metricHistoryUpdated(const std::vector<double>& history);
 
@@ -45,6 +45,8 @@ private:
 
     int mCurrentSelectedMetricIndex; // TODO: add to initializer list
     int mCurrentSelectedPid; // TODO: add to initializer list
+
+    std::vector<double> memHistory;
 };
 
 #endif // CONTROLLER_H

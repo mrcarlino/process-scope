@@ -3,11 +3,12 @@
 
 #include <QMainWindow>
 
-// Forward declarations
-class TotalMetricsView;
-class MetricChartView;
-class ProcessDetailView;
-class ProcessTableView;
+#include "CpuStats.h"
+#include "MemoryStats.h"
+
+#include "ProcessTableView.h"
+#include "ProcessDetailView.h"
+#include "MetricChartView.h"
 
 namespace Ui
 {
@@ -22,12 +23,18 @@ public:
     explicit Viewer(QWidget *parent = nullptr);
     ~Viewer();
 
+    void updateCpuModelName(const std::string& label);
+    void updateCpuStats(const CpuStats& stats);
+    void updateMemoryStats(const MemoryStats& stats);
+
+signals:
+    void metricSelected(int metricIndex); // TODO: is this needed? I can just color internally
+
 private:
     void loadStylesheet();
 
     Ui::Viewer *ui;
 
-    TotalMetricsView* mTotalMetricsView;
     MetricChartView* mMetricChartView;
     ProcessDetailView* mProcessDetailView;
     ProcessTableView* mProcessTableView;

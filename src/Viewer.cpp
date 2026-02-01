@@ -1,11 +1,6 @@
 #include "Viewer.h"
 #include "ui_Viewer.h"
 
-#include "TotalMetricsView.h"
-#include "ProcessTableView.h"
-#include "ProcessDetailView.h"
-#include "MetricChartView.h"
-
 Viewer::Viewer(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Viewer)
@@ -20,6 +15,27 @@ Viewer::Viewer(QWidget *parent) :
 Viewer::~Viewer()
 {
     delete ui;
+}
+
+void Viewer::updateCpuModelName(const std::string& label)
+{
+    ui->totalCpuSubLabel->setText(QString::fromStdString(label));
+}
+
+void Viewer::updateCpuStats(const CpuStats& stats)
+{
+    QString label = QString::number(stats.percent, 'f', 2) + "%";
+
+    ui->totalCpuValueLabel->setText(label);
+}
+
+void Viewer::updateMemoryStats(const MemoryStats& stats)
+{
+    QString label = QString::number(stats.percent, 'f', 2) + "%";
+    QString sublabel = QString::number(stats.usedMb, 'f', 0) + " / " + QString::number(stats.totalMb, 'f', 0) + " MB";
+
+    ui->totalMemoryValueLabel->setText(label);
+    ui->totalMemorySubLabel->setText(sublabel);
 }
 
 void Viewer::loadStylesheet()
