@@ -10,6 +10,29 @@ Viewer::Viewer(QWidget *parent) :
     resize(1200, 800);
 
     loadStylesheet();
+
+    // Initialize the Process Table model
+    mProcessModel = new QStandardItemModel(this);
+    mProcessModel->setColumnCount(2);
+    mProcessModel->setHorizontalHeaderLabels(QStringList() << "PID" << "Name");
+
+    // Connect the View to the Model
+    ui->processTableView->setModel(mProcessModel);
+    ui->processTableView->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->processTableView->verticalHeader()->setVisible(false);
+
+    // Set up table filtering
+    mProcessProxyModel = new QSortFilterProxyModel(this);
+    mProcessProxyModel->setSourceModel(mProcessModel);
+    mProcessProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    ui->processTableView->setModel(mProcessProxyModel);
+    ui->processTableView->setSortingEnabled(true);
+
+    // Set connections
+    connect(ui->searchLineEdit, &QLineEdit::textChanged, this, [&](const QString& str) {
+        mProcessProxyModel->setFilterKeyColumn(1); 
+        mProcessProxyModel->setFilterFixedString(str);
+    });
 }
 
 Viewer::~Viewer()
@@ -36,6 +59,25 @@ void Viewer::updateMemoryStats(const MemoryStats& stats)
 
     ui->totalMemoryValueLabel->setText(label);
     ui->totalMemorySubLabel->setText(sublabel);
+}
+
+void Viewer::updateProcessList(const std::vector<ProcessInfo> &processes)
+{
+    mProcessModel->removeRows(0, mProcessModel->rowCount());
+
+    for (const ProcessInfo& process : processes)
+    {
+        QList<QStandardItem*> rowItems;
+
+        QStandardItem* pidItem = new QStandardItem(QString::number(process.pid));
+        pidItem->setTextAlignment(Qt::AlignCenter);
+        rowItems << pidItem;
+
+        QStandardItem* nameItem = new QStandardItem(QString::fromStdString(process.name));
+        rowItems << nameItem;
+
+        mProcessModel->appendRow(rowItems);
+    }
 }
 
 void Viewer::loadStylesheet()

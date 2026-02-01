@@ -50,6 +50,10 @@ void Controller::updateData()
     MemoryStats memoryStats = mOsMetricsProvider.queryMemoryStats();
     mViewer->updateMemoryStats(memoryStats);
 
+    // Collect and render process list
+    std::vector<ProcessInfo> processes = mOsMetricsProvider.queryProcessTable();
+    mViewer->updateProcessList(processes);
+
     // Collect and render selected process details
     if (mCurrentSelectedMetricIndex != -1)
     {

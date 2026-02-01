@@ -6,9 +6,7 @@
 struct ProcessInfo
 {
     std::string name;
-    int         pid        = -1;
-    double      cpuPercent = 0.0;
-    double      memMb      = 0.0;
+    int pid = -1;
 };
 
 #endif // PROCESSINFO_H

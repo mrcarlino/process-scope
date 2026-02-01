@@ -2,11 +2,14 @@
 #define VIEWER_H
 
 #include <QMainWindow>
+#include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 
+// Structs
 #include "CpuStats.h"
 #include "MemoryStats.h"
+#include "ProcessInfo.h"
 
-#include "ProcessTableView.h"
 #include "ProcessDetailView.h"
 #include "MetricChartView.h"
 
@@ -27,6 +30,8 @@ public:
     void updateCpuStats(const CpuStats& stats);
     void updateMemoryStats(const MemoryStats& stats);
 
+    void updateProcessList(const std::vector<ProcessInfo>& processes);
+
 signals:
     void metricSelected(int metricIndex); // TODO: is this needed? I can just color internally
 
@@ -37,7 +42,9 @@ private:
 
     MetricChartView* mMetricChartView;
     ProcessDetailView* mProcessDetailView;
-    ProcessTableView* mProcessTableView;
+
+    QStandardItemModel* mProcessModel;
+    QSortFilterProxyModel* mProcessProxyModel;
 };
 
 #endif // VIEWER_H
