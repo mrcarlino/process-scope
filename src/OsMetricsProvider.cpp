@@ -18,7 +18,6 @@ OsMetricsProvider::~OsMetricsProvider()
 std::string OsMetricsProvider::getCpuModelName()
 {
     std::ifstream file("/proc/cpuinfo");
-
     if (!file.is_open())
         return "Unknown CPU";
 
@@ -43,7 +42,6 @@ CpuStats OsMetricsProvider::queryCpuStats()
     CpuStats stats;
 
     std::ifstream file("/proc/stat");
-
     if (!file.is_open())
         return CpuStats();
 
@@ -82,7 +80,6 @@ MemoryStats OsMetricsProvider::queryMemoryStats()
     MemoryStats stats;
 
     std::ifstream file("/proc/meminfo");
-
     if (!file.is_open())
         return MemoryStats();
 
@@ -154,6 +151,49 @@ std::vector<ProcessInfo> OsMetricsProvider::queryProcessTable()
 ProcessDetails OsMetricsProvider::queryProcessDetails(int pid)
 {
     ProcessDetails details;
+    details.pid = pid;
+
+    std::ifstream file("/proc/" + std::to_string(pid) + "/status");
+    if (!file.is_open())
+        return ProcessDetails();
+
+    std::string line;
+    while (std::getline(file, line))
+    {
+        size_t colonPos = line.find(":");
+
+        if (line.find("Name") != std::string::npos)
+        {
+            if (colonPos != std::string::npos)
+            {
+                std::string str = line.substr(colonPos + 1);
+
+                size_t start = str.find_first_not_of(" \n\r\t\f\v");
+                if (start != std::string::npos)
+                {
+                    str.erase(0, start);
+                }
+
+                details.name = str;
+            }
+        }
+
+        if (line.find("Threads") != std::string::npos)
+        {
+            if (colonPos != std::string::npos)
+            {
+                std::string str = line.substr(colonPos + 1);
+
+                size_t start = str.find_first_not_of(" \n\r\t\f\v");
+                if (start != std::string::npos)
+                {
+                    str.erase(0, start);
+                }
+
+                details.threads = std::stoi(str);
+            }
+        }
+    }
 
     return details;
 }

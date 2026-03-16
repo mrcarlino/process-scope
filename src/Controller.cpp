@@ -26,14 +26,15 @@ Controller::~Controller()
 void Controller::setConnections()
 {
     // These need signals to go back up
-    // connect(); // TotalMetricsView::metricSelected to Controller::onTotalMetricSelected 
-    // connect(); // ProcessTableView::processSelected to Controller::onProcessSelected
+    connect(mViewer, &Viewer::metricSelected, this, [&](const QModelIndex &index){
+        QModelIndex pidIndex = index.sibling(index.row(), 0);
+        int pid = pidIndex.data().toInt();
 
-    // These can be implemented directly without signals
-    // connect(); // Controller::systemTotalsUpdated to TotalMetricsView::updateTotals
-    // connect(); // Controller::metricHistoryUpdated to MetricChartView::setHistory
-    // connect(); // Controller::processTableUpdated to ProcessTableView:: ?
-    // connect(); // Controller::selectedProcessUpdated to ProcessDetailView::setDetails
+        ProcessDetails details = mOsMetricsProvider.queryProcessDetails(pid);
+
+        mViewer->updateProcessDetails(details);
+    }); 
+    // connect(); // ProcessTableView::processSelected to Controller::onProcessSelected
 }
 
 void Controller::updateData()

@@ -305,25 +305,12 @@
           <item>
            <widget class="QTableView" name="processTableView">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
            </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </widget>
@@ -351,7 +338,7 @@
             </property>
             <layout class="QGridLayout" name="gridLayout">
              <item row="0" column="0">
-              <widget class="QFrame" name="processCpuFrame">
+              <widget class="QFrame" name="processPIDFrame">
                <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
                </property>
@@ -375,16 +362,16 @@
                  <number>12</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="processCpuCardLabel">
+                 <widget class="QLabel" name="processPIDCardLabel">
                   <property name="text">
-                   <string>CPU</string>
+                   <string>PID</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="processCpuValueLabel">
+                 <widget class="QLabel" name="processPIDValueLabel">
                   <property name="text">
-                   <string>--%</string>
+                   <string>--</string>
                   </property>
                  </widget>
                 </item>
@@ -392,7 +379,7 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QFrame" name="processMemoryFrame">
+              <widget class="QFrame" name="processThreadsFrame">
                <property name="frameShape">
                 <enum>QFrame::NoFrame</enum>
                </property>
@@ -416,16 +403,16 @@
                  <number>12</number>
                 </property>
                 <item>
-                 <widget class="QLabel" name="processMemoryCardLabel">
+                 <widget class="QLabel" name="processThreadsCardLabel">
                   <property name="text">
-                   <string>Memory</string>
+                   <string>Threads</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="labelprocessMemoryValueLabel">
+                 <widget class="QLabel" name="processThreadsValueLabel">
                   <property name="text">
-                   <string>--%</string>
+                   <string>--</string>
                   </property>
                  </widget>
                 </item>

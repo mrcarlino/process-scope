@@ -31,9 +31,10 @@ public:
     void updateMemoryStats(const MemoryStats& stats);
 
     void updateProcessList(const std::vector<ProcessInfo>& processes);
+    void updateProcessDetails(const ProcessDetails& details);
 
 signals:
-    void metricSelected(int metricIndex); // TODO: is this needed? I can just color internally
+    void metricSelected(const QModelIndex& index); // TODO: is this needed? I can just color internally
 
 private:
     void loadStylesheet();

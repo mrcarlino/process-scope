@@ -33,6 +33,9 @@ Viewer::Viewer(QWidget *parent) :
         mProcessProxyModel->setFilterKeyColumn(1); 
         mProcessProxyModel->setFilterFixedString(str);
     });
+
+    // Process list row click
+    connect(ui->processTableView, &QTableView::clicked, this, [&](const QModelIndex& index) { emit metricSelected(index); });
 }
 
 Viewer::~Viewer()
@@ -78,6 +81,14 @@ void Viewer::updateProcessList(const std::vector<ProcessInfo> &processes)
 
         mProcessModel->appendRow(rowItems);
     }
+}
+
+void Viewer::updateProcessDetails(const ProcessDetails& details)
+{
+    ui->processDetailsSectionLabel->setText(QString::fromStdString(details.name));
+    ui->processPIDValueLabel->setText(QString::number(details.pid));
+    ui->processThreadsValueLabel->setText(QString::number(details.threads));
+
 }
 
 void Viewer::loadStylesheet()
