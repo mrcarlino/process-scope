@@ -1,0 +1,10 @@
+services:
+  process-scope:
+    build: .
+    image: process-scope:latest
+    pid: "host"
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /proc:/host/proc:ro
+      - /tmp/.X11-unix:/tmp/.X11-unix
