@@ -8,6 +8,7 @@
 // Local includes
 #include "CpuStats.h"
 #include "MemoryStats.h"
+#include "NetworkStats.h"
 #include "ProcessInfo.h"
 #include "ProcessDetails.h"
 
@@ -21,6 +22,7 @@ public:
 
     CpuStats queryCpuStats();
     MemoryStats queryMemoryStats();
+    NetworkStats queryNetworkStats();
 
     std::vector<ProcessInfo> queryProcessTable();
     ProcessDetails queryProcessDetails(int pid);
@@ -31,6 +33,9 @@ private:
 
     uint64_t mPrevCpuTotal;
     uint64_t mPrevCpuIdle;
+
+    uint64_t mPrevTotalRx;
+    uint64_t mPrevTotalTx;
 };
 
 #endif // OSMETRICSPROVIDER_H

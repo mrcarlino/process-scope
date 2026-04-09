@@ -189,7 +189,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="totalGpuFrame">
+        <widget class="QFrame" name="networkBandwidthFrame">
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
          </property>
@@ -216,23 +216,23 @@
            <number>12</number>
           </property>
           <item>
-           <widget class="QLabel" name="totalGpuCardLabel">
+           <widget class="QLabel" name="networkBandwidthCardLabel">
             <property name="text">
-             <string>Total GPU</string>
+             <string>Network Bandwidth</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="totalGpuValueLabel">
+           <widget class="QLabel" name="networkBandwidthValueLabel">
             <property name="text">
-             <string>--%</string>
+             <string>↓ --.- MB/s  |  ↑ --.- MB/s</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="totalGpuSubLabel">
+           <widget class="QLabel" name="networkBandwidthSubLabel">
             <property name="text">
-             <string>-- / -- MB</string>
+             <string>Adapter: --</string>
             </property>
            </widget>
           </item>

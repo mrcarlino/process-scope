@@ -51,6 +51,10 @@ void Controller::updateData()
     MemoryStats memoryStats = mOsMetricsProvider.queryMemoryStats();
     mViewer->updateMemoryStats(memoryStats);
 
+    // Collect and render network stats
+    NetworkStats networkStats = mOsMetricsProvider.queryNetworkStats();
+    mViewer->updateNetworkStats(networkStats);
+
     // Collect and render process list
     std::vector<ProcessInfo> processes = mOsMetricsProvider.queryProcessTable();
     mViewer->updateProcessList(processes);

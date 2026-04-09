@@ -12,7 +12,6 @@
 #include "Viewer.h"
 #include "OsMetricsProvider.h"
 #include "ProcessInfo.h"
-#include "MemoryStats.h"
 #include "ProcessDetails.h"
 
 class Controller : public QObject

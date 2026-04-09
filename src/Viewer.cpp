@@ -1,5 +1,6 @@
 #include "Viewer.h"
 #include "ui_Viewer.h"
+#include <sstream>
 
 Viewer::Viewer(QWidget *parent) :
     QMainWindow(parent),
@@ -62,6 +63,47 @@ void Viewer::updateMemoryStats(const MemoryStats& stats)
 
     ui->totalMemoryValueLabel->setText(label);
     ui->totalMemorySubLabel->setText(sublabel);
+}
+
+void Viewer::updateNetworkStats(const NetworkStats &stats)
+{
+    std::ostringstream d_out;
+    d_out << std::fixed << std::setprecision(1);
+
+    if (stats.download < 1024)
+    {
+        d_out << static_cast<int>(stats.download) << " B/s";
+    }
+    else if (stats.download < 1048576)
+    {
+        d_out << (stats.download / 1024.0) << " KB/s";
+    }
+    else
+    {
+        d_out << (stats.download / 1048576.0) << " MB/s"; // Does the division here!
+    }
+
+    std::ostringstream u_out;
+    u_out << std::fixed << std::setprecision(1);
+
+    if (stats.upload < 1024)
+    {
+        u_out << static_cast<int>(stats.upload) << " B/s";
+    }
+    else if (stats.upload < 1048576)
+    {
+        u_out << (stats.upload / 1024.0) << " KB/s";
+    }
+    else
+    {
+        u_out << (stats.upload / 1048576.0) << " MB/s"; // Does the division here!
+    }
+
+    QString label = "↓ " + QString::fromStdString(d_out.str()) + " | ↑ " + QString::fromStdString(u_out.str());
+    QString sublabel = "Adapter: " + QString::fromStdString(stats.activeAdapter);
+
+    ui->networkBandwidthValueLabel->setText(label);
+    ui->networkBandwidthSubLabel->setText(sublabel);
 }
 
 void Viewer::updateProcessList(const std::vector<ProcessInfo> &processes)

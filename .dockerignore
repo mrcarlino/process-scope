@@ -1,0 +1,14 @@
+# Ignore local build directories and CMake artifacts
+build/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
+# Ignore Git history (saves space)
+.git/
+.gitignore
+
+# Ignore IDE specific files
+.vscode/
+*.user

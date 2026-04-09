@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <algorithm>
 
 using namespace std::filesystem;
 
@@ -102,6 +103,70 @@ MemoryStats OsMetricsProvider::queryMemoryStats()
     stats.totalMb = totalKb / 1024.0;
 
     return stats;
+}
+
+NetworkStats OsMetricsProvider::queryNetworkStats()
+{
+    NetworkStats networkStats;
+
+    std::ifstream file("/host/proc/net/dev");
+    if (!file.is_open())
+        return NetworkStats();
+
+    // One time flag to allow data accumulation for comparison
+    static bool hasPrevious = false;
+    std::string line;
+
+    // Skip the first two header lines
+    std::getline(file, line);
+    std::getline(file, line);
+
+    uint64_t currentTotalRx = 0;
+    uint64_t currentTotalTx = 0;
+    uint64_t highestRx = 0;
+
+    while (std::getline(file, line))
+    {
+        std::replace(line.begin(), line.end(), ':', ' ');
+        std::istringstream iss(line);
+
+        std::string interface;
+        uint64_t rxBytes, rxPackets, rxErrs, rxDrop, rxFifo, rxFrame, rxComp, rxMulti, txBytes;
+
+        // Extract the information
+        if (iss >> interface >> rxBytes >> rxPackets >> rxErrs >> rxDrop >> rxFifo >> rxFrame >> rxComp >> rxMulti >> txBytes)
+        {
+            // Ignore the loopback device and Docker's virtual network bridges
+            if (interface == "lo" || interface.find("docker") == 0 || interface.find("br-") == 0 || interface.find("veth") == 0)
+            {
+                continue;
+            }
+
+            currentTotalRx += rxBytes;
+            currentTotalTx += txBytes;
+
+            // Because there can be more than one, the active adapter is the one doing the most downloading
+            if (rxBytes > highestRx)
+            {
+                highestRx = rxBytes;
+                networkStats.activeAdapter = interface;
+            }
+        }
+    }
+
+    // Calculate the speed between current and last total bytes
+    if (hasPrevious)
+    {
+        // MB/s
+        networkStats.download = static_cast<double>(currentTotalRx - mPrevTotalRx);
+        networkStats.upload = static_cast<double>(currentTotalTx - mPrevTotalTx);
+    }
+
+    mPrevTotalRx = currentTotalRx;
+    mPrevTotalTx = currentTotalTx;
+    hasPrevious = true;
+
+    return networkStats;
 }
 
 std::vector<ProcessInfo> OsMetricsProvider::queryProcessTable()

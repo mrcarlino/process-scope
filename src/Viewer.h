@@ -8,6 +8,7 @@
 // Structs
 #include "CpuStats.h"
 #include "MemoryStats.h"
+#include "NetworkStats.h"
 #include "ProcessInfo.h"
 
 #include "ProcessDetailView.h"
@@ -29,6 +30,7 @@ public:
     void updateCpuModelName(const std::string& label);
     void updateCpuStats(const CpuStats& stats);
     void updateMemoryStats(const MemoryStats& stats);
+    void updateNetworkStats(const NetworkStats& stats);
 
     void updateProcessList(const std::vector<ProcessInfo>& processes);
     void updateProcessDetails(const ProcessDetails& details);

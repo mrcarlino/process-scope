@@ -3,6 +3,7 @@ services:
     build: .
     image: process-scope:latest
     pid: "host"
+    network_mode: "host"
     environment:
       - DISPLAY=${DISPLAY}
     volumes:
