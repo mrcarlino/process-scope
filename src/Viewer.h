@@ -34,9 +34,10 @@ public:
 
     void updateProcessList(const std::vector<ProcessInfo>& processes);
     void updateProcessDetails(const ProcessDetails& details);
+    void restoreTableSelection(int pid);
 
 signals:
-    void metricSelected(const QModelIndex& index); // TODO: is this needed? I can just color internally
+    void metricSelected(const QModelIndex& index);
 
 private:
     void loadStylesheet();

@@ -127,10 +127,41 @@ void Viewer::updateProcessList(const std::vector<ProcessInfo> &processes)
 
 void Viewer::updateProcessDetails(const ProcessDetails& details)
 {
-    ui->processDetailsSectionLabel->setText(QString::fromStdString(details.name));
-    ui->processPIDValueLabel->setText(QString::number(details.pid));
-    ui->processThreadsValueLabel->setText(QString::number(details.threads));
+    QString nameLabel = details.name == "" ? "Process Details" : QString::fromStdString(details.name);
+    QString pidLabel = details.pid < 0 ? "--" : QString::number(details.pid);
+    QString threadLabel = details.threads < 0 ? "--" : QString::number(details.threads);
+    QString memRssLabel = details.memoryRSS < 0.0 ? "--" : QString::number(details.memoryRSS, 'f', 2) + " MB";
 
+    ui->processDetailsSectionLabel->setText(nameLabel);
+    ui->processPIDValueLabel->setText(pidLabel);
+    ui->processThreadsValueLabel->setText(threadLabel);
+    ui->processMemRSSValueLabel->setText(memRssLabel);
+}
+
+void Viewer::restoreTableSelection(int pid) 
+{
+    if (pid == -1) return;
+
+    QAbstractItemModel* model = ui->processTableView->model();
+    if (!model) return;
+
+    // Convert the int to a string so it matches the QStandardItem text
+    QString pidString = QString::number(pid);
+
+    QModelIndexList matches = model->match(
+        model->index(0, 0),        // Starting index
+        Qt::DisplayRole,           // Searching the displayed text
+        pidString,                 // <--- Pass the STRING here
+        1,                         
+        Qt::MatchFixedString | Qt::MatchCaseSensitive // String matching flags
+    );
+
+    if (!matches.isEmpty()) {
+        ui->processTableView->selectionModel()->select(
+            matches.first(), 
+            QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows
+        );
+    }
 }
 
 void Viewer::loadStylesheet()

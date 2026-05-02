@@ -1,6 +1,7 @@
 #include "Controller.h"
 
-Controller::Controller(QObject *parent)
+Controller::Controller(QObject *parent) :
+    mCurrentSelectedPid(-1)
 {
     // Create the main window
     mViewer = new Viewer();
@@ -25,16 +26,24 @@ Controller::~Controller()
 
 void Controller::setConnections()
 {
+    // TODO: disconnect if process ends or unclicked
+    
     // These need signals to go back up
     connect(mViewer, &Viewer::metricSelected, this, [&](const QModelIndex &index){
         QModelIndex pidIndex = index.sibling(index.row(), 0);
-        int pid = pidIndex.data().toInt();
+        int newSelectedPid = pidIndex.data().toInt();
+        mCurrentSelectedPid = mCurrentSelectedPid == pidIndex.data().toInt() ? -1 : newSelectedPid;
 
-        ProcessDetails details = mOsMetricsProvider.queryProcessDetails(pid);
+        mViewer->restoreTableSelection(mCurrentSelectedPid);
 
-        mViewer->updateProcessDetails(details);
-    }); 
-    // connect(); // ProcessTableView::processSelected to Controller::onProcessSelected
+        if (mCurrentSelectedPid < 0)
+        {
+            ProcessDetails details;
+            mViewer->updateProcessDetails(details);
+        }
+
+        updateData();
+    });
 }
 
 void Controller::updateData()
@@ -60,11 +69,13 @@ void Controller::updateData()
     mViewer->updateProcessList(processes);
 
     // Collect and render selected process details
-    if (mCurrentSelectedMetricIndex != -1)
+    if (mCurrentSelectedPid != -1)
     {
-        ProcessDetails processDetails = mOsMetricsProvider.queryProcessDetails(mCurrentSelectedMetricIndex);
-        // TODO: add call to ProcessDetailView
+        ProcessDetails details = mOsMetricsProvider.queryProcessDetails(mCurrentSelectedPid);
+        mViewer->updateProcessDetails(details);
     }
+
+    mViewer->restoreTableSelection(mCurrentSelectedPid);
 }
 
 void Controller::onTotalMetricSelected(int metricIndex)
