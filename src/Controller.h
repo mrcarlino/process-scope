@@ -42,8 +42,7 @@ private:
     OsMetricsProvider mOsMetricsProvider;
     QTimer* mTimer;
 
-    int mCurrentSelectedMetricIndex; // TODO: add to initializer list
-    int mCurrentSelectedPid; // TODO: add to initializer list
+    int mCurrentSelectedPid;
 
     std::vector<double> memHistory;
 };

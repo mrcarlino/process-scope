@@ -9,6 +9,7 @@ struct ProcessDetails
     std::string name;
     int pid = -1;
     int threads = -1;
+    float memoryRSS = -1.0;
 };
 
 #endif // PROCESSDETAILS_H
