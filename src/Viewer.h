@@ -11,7 +11,8 @@
 #include "NetworkStats.h"
 #include "ProcessInfo.h"
 
-#include "ProcessDetailView.h"
+// Local includes
+#include "ProcessDetails.h"
 #include "MetricChartView.h"
 
 namespace Ui
@@ -45,7 +46,6 @@ private:
     Ui::Viewer *ui;
 
     MetricChartView* mMetricChartView;
-    ProcessDetailView* mProcessDetailView;
 
     QStandardItemModel* mProcessModel;
     QSortFilterProxyModel* mProcessProxyModel;
