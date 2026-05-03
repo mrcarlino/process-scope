@@ -273,6 +273,23 @@ ProcessDetails OsMetricsProvider::queryProcessDetails(int pid)
                 details.memoryRSS = std::stoi(str) / 1024.0;
             }
         }
+
+        if (line.find("VmSize") != std::string::npos)
+        {
+            if (colonPos != std::string::npos)
+            {
+                std::string str = line.substr(colonPos + 1);
+
+                size_t start = str.find_first_not_of(" \n\r\t\f\v");
+                if (start != std::string::npos)
+                {
+                    str.erase(0, start);
+                }
+
+                // Convert Kb to Mb
+                details.memoryVSZ = std::stoi(str) / 1024.0;
+            }
+        }
     }
 
     return details;

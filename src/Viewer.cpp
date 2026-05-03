@@ -131,11 +131,13 @@ void Viewer::updateProcessDetails(const ProcessDetails& details)
     QString pidLabel = details.pid < 0 ? "--" : QString::number(details.pid);
     QString threadLabel = details.threads < 0 ? "--" : QString::number(details.threads);
     QString memRssLabel = details.memoryRSS < 0.0 ? "--" : QString::number(details.memoryRSS, 'f', 2) + " MB";
+    QString memVszLabel = details.memoryVSZ < 0.0 ? "--" : QString::number(details.memoryVSZ, 'f', 2) + " MB";
 
     ui->processDetailsSectionLabel->setText(nameLabel);
     ui->processPIDValueLabel->setText(pidLabel);
     ui->processThreadsValueLabel->setText(threadLabel);
     ui->processMemRSSValueLabel->setText(memRssLabel);
+    ui->processMemVSZValueLabel->setText(memVszLabel);
 }
 
 void Viewer::restoreTableSelection(int pid) 

@@ -10,6 +10,7 @@ struct ProcessDetails
     int pid = -1;
     int threads = -1;
     float memoryRSS = -1.0;
+    float memoryVSZ = -1.0;
 };
 
 #endif // PROCESSDETAILS_H
