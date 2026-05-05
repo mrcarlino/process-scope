@@ -71,7 +71,7 @@ CpuStats OsMetricsProvider::queryCpuStats()
     mPrevCpuIdle = currentIdle;
 
     if (totalDiff > 0)
-        stats.percent = ((double)(totalDiff - idleDiff) / totalDiff) * 100.0;
+        stats.percent = ((float)(totalDiff - idleDiff) / totalDiff) * 100.0;
 
     return stats;
 }
@@ -98,7 +98,7 @@ MemoryStats OsMetricsProvider::queryMemoryStats()
             availKb = value;
     }
 
-    stats.percent = ((double)(totalKb - availKb) / totalKb) * 100.0;
+    stats.percent = ((float)(totalKb - availKb) / totalKb) * 100.0;
     stats.usedMb = (totalKb - availKb) / 1024.0;
     stats.totalMb = totalKb / 1024.0;
 
@@ -158,8 +158,8 @@ NetworkStats OsMetricsProvider::queryNetworkStats()
     if (hasPrevious)
     {
         // MB/s
-        networkStats.download = static_cast<double>(currentTotalRx - mPrevTotalRx);
-        networkStats.upload = static_cast<double>(currentTotalTx - mPrevTotalTx);
+        networkStats.download = static_cast<float>(currentTotalRx - mPrevTotalRx);
+        networkStats.upload = static_cast<float>(currentTotalTx - mPrevTotalTx);
     }
 
     mPrevTotalRx = currentTotalRx;

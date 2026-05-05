@@ -1,7 +1,8 @@
 #include "Controller.h"
 
 Controller::Controller(QObject *parent) :
-    mCurrentSelectedPid(-1)
+    mCurrentSelectedPid(-1),
+    mCurrentSelectedTotalMetric(1)
 {
     // Create the main window
     mViewer = new Viewer();
@@ -29,7 +30,7 @@ void Controller::setConnections()
     // TODO: disconnect if process ends or unclicked
     
     // These need signals to go back up
-    connect(mViewer, &Viewer::metricSelected, this, [&](const QModelIndex &index){
+    connect(mViewer, &Viewer::processSelected, this, [&](const QModelIndex &index){
         QModelIndex pidIndex = index.sibling(index.row(), 0);
         int newSelectedPid = pidIndex.data().toInt();
         mCurrentSelectedPid = mCurrentSelectedPid == pidIndex.data().toInt() ? -1 : newSelectedPid;
@@ -44,6 +45,11 @@ void Controller::setConnections()
 
         updateData();
     });
+
+    connect(mViewer, &Viewer::totalMetricSelected, this, [&](int index) {
+        mCurrentSelectedTotalMetric = index;
+        updateData();
+    });
 }
 
 void Controller::updateData()
@@ -54,15 +60,20 @@ void Controller::updateData()
 
     // Collect and render memory stats
     CpuStats cpuStats = mOsMetricsProvider.queryCpuStats();
+    cpuHistoryHandler(cpuStats.percent);
     mViewer->updateCpuStats(cpuStats);
 
     // Collect and render memory stats
     MemoryStats memoryStats = mOsMetricsProvider.queryMemoryStats();
+    memHistoryHandler(memoryStats.percent);
     mViewer->updateMemoryStats(memoryStats);
 
     // Collect and render network stats
     NetworkStats networkStats = mOsMetricsProvider.queryNetworkStats();
     mViewer->updateNetworkStats(networkStats);
+
+    // Choose and render active history buffer
+    selectedMetricHandler();
 
     // Collect and render process list
     std::vector<ProcessInfo> processes = mOsMetricsProvider.queryProcessTable();
@@ -78,12 +89,37 @@ void Controller::updateData()
     mViewer->restoreTableSelection(mCurrentSelectedPid);
 }
 
-void Controller::onTotalMetricSelected(int metricIndex)
+void Controller::cpuHistoryHandler(float latestValue)
 {
-
+    if (mTotalCpuHistory.size() > 60)
+        mTotalCpuHistory.pop_front();
+    
+    mTotalCpuHistory.push_back(latestValue);
 }
 
-void Controller::onProcessSelected(int pid)
+void Controller::memHistoryHandler(float latestValue)
+{
+    if (mTotalMemHistory.size() > 60)
+        mTotalMemHistory.pop_front();
+    
+    mTotalMemHistory.push_back(latestValue);
+}
+
+void Controller::selectedMetricHandler()
+{
+    // TODO: use enums after proving functionality
+    // TODO: pass in name to override card title e.g. CPU% History
+    if (mCurrentSelectedTotalMetric == 1)
+    {
+        mViewer->updateSelectedMetric("CPU History", mTotalCpuHistory);
+    }
+    else if (mCurrentSelectedTotalMetric == 2)
+    {
+        mViewer->updateSelectedMetric("Memory History", mTotalMemHistory);
+    }
+}
+
+void Controller::onTotalMetricSelected(int metricIndex)
 {
 
 }

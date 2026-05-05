@@ -6,8 +6,8 @@
 struct NetworkStats
 {
     std::string activeAdapter = "--";
-    double download = 0.0;
-    double upload = 0.0;
+    float download = 0.0;
+    float upload = 0.0;
 };
 
 #endif // NETWORK_STATS_H

@@ -3,6 +3,7 @@
 
 // STL includes
 #include <vector>
+#include <deque>
 
 // Qt includes
 #include <QObject>
@@ -22,20 +23,15 @@ public:
     explicit Controller(QObject *parent = nullptr);
     ~Controller();
 
-signals:
-    // Update the views
-    void processTableUpdated(const std::vector<ProcessInfo>& list);
-    void systemTotalsUpdated(const MemoryStats& totals);
-    void selectedProcessUpdated(const ProcessDetails& details);
-    void metricHistoryUpdated(const std::vector<double>& history);
-
 public slots:
     void updateData(); // On timer
     void onTotalMetricSelected(int metricIndex);
-    void onProcessSelected(int pid);
 
 private:
     void setConnections();
+    void cpuHistoryHandler(float latestValue);
+    void memHistoryHandler(float latestValue);
+    void selectedMetricHandler();
 
     Viewer* mViewer;
 
@@ -43,8 +39,10 @@ private:
     QTimer* mTimer;
 
     int mCurrentSelectedPid;
+    int mCurrentSelectedTotalMetric;
 
-    std::vector<double> memHistory;
+    std::deque<float> mTotalCpuHistory;
+    std::deque<float> mTotalMemHistory;
 };
 
 #endif // CONTROLLER_H

@@ -12,6 +12,8 @@ Viewer::Viewer(QWidget *parent) :
 
     loadStylesheet();
 
+    setupChart();
+
     // Initialize the Process Table model
     mProcessModel = new QStandardItemModel(this);
     mProcessModel->setColumnCount(2);
@@ -35,8 +37,16 @@ Viewer::Viewer(QWidget *parent) :
         mProcessProxyModel->setFilterFixedString(str);
     });
 
+    connect(ui->totalCpuFrame, &ClickableCard::clicked, this, [this](){
+        emit totalMetricSelected(1);
+    });
+
+    connect(ui->totalMemoryFrame, &ClickableCard::clicked, this, [this](){
+        emit totalMetricSelected(2);
+    });
+
     // Process list row click
-    connect(ui->processTableView, &QTableView::clicked, this, [&](const QModelIndex& index) { emit metricSelected(index); });
+    connect(ui->processTableView, &QTableView::clicked, this, [&](const QModelIndex& index) { emit processSelected(index); });
 }
 
 Viewer::~Viewer()
@@ -106,6 +116,27 @@ void Viewer::updateNetworkStats(const NetworkStats &stats)
     ui->networkBandwidthSubLabel->setText(sublabel);
 }
 
+void Viewer::updateSelectedMetric(std::string name, const std::deque<float>& history)
+{
+    ui->selectedMetricSectionLabel->setText(QString::fromStdString(name));
+
+    // Build the new data points in memory
+    QList<QPointF> points;
+    
+    // We want the newest data point at X = 0, and the oldest at X = -60.
+    // If the deque has 45 items, we start at X = -45.
+    int currentX = -history.size() + 1; 
+    
+    for (double value : history) 
+    {
+        points.append(QPointF(currentX, value));
+        currentX++;
+    }
+
+    // Swap the data into the GPU in one atomic operation
+    mSeries->replace(points);
+}
+
 void Viewer::updateProcessList(const std::vector<ProcessInfo> &processes)
 {
     mProcessModel->removeRows(0, mProcessModel->rowCount());
@@ -164,6 +195,47 @@ void Viewer::restoreTableSelection(int pid)
             QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows
         );
     }
+}
+
+void Viewer::setupChart()
+{
+    // Create the data series
+    mSeries = new QLineSeries();
+    
+    // Make the line look like a professional monitor
+    QPen pen(QColor("#0078D7")); 
+    pen.setWidth(2);
+    mSeries->setPen(pen);
+
+    // Create the chart and attach the series
+    mChart = new QChart();
+    mChart->addSeries(mSeries);
+    mChart->legend()->hide();
+    mChart->setMargins(QMargins(0, 0, 0, 0)); // Remove dead white space
+    mChart->setBackgroundRoundness(0);
+
+    // Setup the X Axis (Time: -60 seconds to 0)
+    mAxisX = new QValueAxis();
+    mAxisX->setRange(-60, 0);
+    mAxisX->setLabelFormat("%d s");
+    mChart->addAxis(mAxisX, Qt::AlignBottom);
+    mSeries->attachAxis(mAxisX);
+
+    // Setup the Y Axis (Values: 0 to Max)
+    mAxisY = new QValueAxis();
+    mAxisY->setRange(0, 100); // Default to 100%
+    mAxisY->setLabelFormat("%d");
+    mAxisY->setTickCount(3);
+    mChart->addAxis(mAxisY, Qt::AlignLeft);
+    mSeries->attachAxis(mAxisY);
+
+    // Create the View and inject it into your UI layout
+    QChartView *chartView = new QChartView(mChart);
+    chartView->setRenderHint(QPainter::Antialiasing); // Smooth lines
+
+    chartView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QVBoxLayout *existingLayout = qobject_cast<QVBoxLayout*>(ui->selectedMetricFrame->layout());
+    existingLayout->addWidget(chartView, 1);
 }
 
 void Viewer::loadStylesheet()

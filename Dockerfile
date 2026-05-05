@@ -9,6 +9,7 @@ RUN apt update && apt install -y \
     build-essential \
     cmake \
     qt6-base-dev \
+    libqt6charts6-dev \
     libgl1-mesa-dev \
     && rm -rf /var/lib/apt/lists/*
 

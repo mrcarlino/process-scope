@@ -3,7 +3,7 @@
 
 struct CpuStats
 {
-    double percent = 0.0;
+    float percent = 0.0;
 };
 
 #endif // CPU_STATS_H

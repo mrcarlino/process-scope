@@ -3,9 +3,9 @@
 
 struct MemoryStats
 {
-    double percent = 0.0;
-    double usedMb  = 0.0;
-    double totalMb = 0.0;
+    float percent = 0.0;
+    float usedMb  = 0.0;
+    float totalMb = 0.0;
 };
 
 #endif // MEMORY_STATS_H
